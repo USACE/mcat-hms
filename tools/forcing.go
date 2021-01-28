@@ -29,7 +29,7 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 	forcingData := HmsForcingData{}
 
-	filePath := buildFilePath(hm.ModelDirectory, file)
+	filePath := BuildFilePath(hm.ModelDirectory, file)
 
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {

@@ -63,7 +63,7 @@ func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	var basinProperties bool = false
 	var endBasinProperties bool = true
 
-	filePath := buildFilePath(hm.ModelDirectory, file)
+	filePath := BuildFilePath(hm.ModelDirectory, file)
 
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
@@ -159,7 +159,7 @@ func exportGeometryData(hm *HmsModel) {
 
 		for _, geoRefFile := range geometryData.GeoRefFiles {
 
-			filePath := buildFilePath(hm.ModelDirectory, geoRefFile)
+			filePath := BuildFilePath(hm.ModelDirectory, geoRefFile)
 
 			_, err := hm.FileStore.GetObject(filePath)
 			if err != nil {

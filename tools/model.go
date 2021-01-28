@@ -131,7 +131,7 @@ func (hm *HmsModel) IsGeospatial() bool {
 	for _, geometryData := range hm.Metadata.GeometryMetadata {
 
 		for _, geoRefFile := range geometryData.GeoRefFiles {
-			filePath := buildFilePath(hm.ModelDirectory, geoRefFile)
+			filePath := BuildFilePath(hm.ModelDirectory, geoRefFile)
 			_, err := hm.FileStore.GetObject(filePath)
 			if err == nil {
 				return true

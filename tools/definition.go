@@ -101,7 +101,7 @@ func nextLineData(sc *bufio.Scanner, delimiter string) string {
 
 // Extract all model file paths from the definition file...
 func getDefinitionData(hm *HmsModel) error {
-	defFilePath := buildFilePath(hm.ModelDirectory, hm.DefinitionFile)
+	defFilePath := BuildFilePath(hm.ModelDirectory, hm.DefinitionFile)
 	inputFiles := HmsInputFiles{}
 	outputFiles := HmsOutputFiles{}
 

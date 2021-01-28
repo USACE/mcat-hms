@@ -11,7 +11,7 @@ import (
 
 // IsGeospatial godoc
 // @Summary Check if the HMS model has geospatial information
-// @Description  Check if the HMS model has geospatial information
+// @Description Check if the HMS model has geospatial information
 // @Tags MCAT
 // @Accept json
 // @Produce json
