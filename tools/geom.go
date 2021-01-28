@@ -27,20 +27,22 @@ type HmsGeometryData struct {
 var GeometryFeatureTypes []string = []string{"Subbasin", "Reach", "Junction", "Source", "Sink", "Reservoir", "Diversion"}
 
 // getGridPath ...
-func getGridPath(hm *HmsModel) error {
+func getGridPath(hm *HmsModel) {
 	matchingFiles := make([]string, 0)
 
 	prefix := hm.ModelDirectory + "/"
 
 	files, err := hm.FileStore.GetDir(prefix, false)
 	if err != nil {
-		return err
+		fmt.Println(err)
+		return
 	}
 	for _, file := range *files {
 		if file.Type == hmsFileExt.Grid {
 			firstLine, err := readFirstLine(hm.FileStore, filepath.Join(file.Path, file.Name))
 			if err != nil {
-				return err
+				fmt.Println(err)
+				continue
 			}
 			if strings.Contains(firstLine, "Grid Manager:") {
 				matchingFiles = append(matchingFiles, file.Name)
@@ -49,11 +51,11 @@ func getGridPath(hm *HmsModel) error {
 	}
 
 	hm.Files.SupplementalFiles.GridFiles = matchingFiles
-	return nil
+	return
 }
 
 //Extract features and their properties from the geometry files...
-func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup, errChan chan error) {
+func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
@@ -67,7 +69,6 @@ func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup, errChan chan
 	if err != nil {
 		geometryData.Notes += fmt.Sprintf("%s failed to process. ", file)
 		hm.Metadata.GeometryMetadata[file] = geometryData
-		errChan <- err
 		return
 	}
 
@@ -160,10 +161,8 @@ func exportGeometryData(hm *HmsModel) {
 
 			filePath := buildFilePath(hm.ModelDirectory, geoRefFile)
 
-			if fileExists(filePath) {
-				continue
-
-			} else {
+			_, err := hm.FileStore.GetObject(filePath)
+			if err != nil {
 				geometryData.Notes += fmt.Sprintf("%s does not exist. ", geoRefFile)
 			}
 		}

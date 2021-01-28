@@ -1,8 +1,6 @@
 package tools
 
 import (
-	"errors"
-	"fmt"
 	"path/filepath"
 	"sync"
 
@@ -112,36 +110,10 @@ type hmsWaitGroup struct {
 
 // IsAModel ...
 func (hm *HmsModel) IsAModel() bool {
-	if len(hm.Metadata.ForcingMetadata) == 0 {
+	if len(hm.Metadata.GeometryMetadata) == 0 {
 		return false
 	}
-
-	if len(hm.Metadata.GeometryMetadata) == 0 {
-		return true
-	}
-
 	return true
-}
-
-// IsGeospatial ...
-func (hm *HmsModel) IsGeospatial() bool {
-	for _, geometryData := range hm.Metadata.GeometryMetadata {
-
-		for _, geoRefFile := range geometryData.GeoRefFiles {
-
-			filePath := buildFilePath(hm.ModelDirectory, geoRefFile)
-
-			if fileExists(filePath) {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-// ModelType ...
-func (hm *HmsModel) ModelType() string {
-	return hm.Type
 }
 
 // ModelVersion ...
@@ -149,13 +121,33 @@ func (hm *HmsModel) ModelVersion() string {
 	return hm.Version
 }
 
-// Index ...
-func (hm *HmsModel) Index() (Model, error) {
+// ModelType ...
+func (hm *HmsModel) ModelType() string {
+	return hm.Type
+}
 
-	if !hm.IsAModel() {
-		return Model{}, errors.New("model is not valid")
+// IsGeospatial ...
+func (hm *HmsModel) IsGeospatial() bool {
+	for _, geometryData := range hm.Metadata.GeometryMetadata {
+
+		for _, geoRefFile := range geometryData.GeoRefFiles {
+			filePath := buildFilePath(hm.ModelDirectory, geoRefFile)
+			_, err := hm.FileStore.GetObject(filePath)
+			if err == nil {
+				return true
+			}
+		}
 	}
+	return false
+}
 
+// GeospatialData  ...
+func (hm *HmsModel) GeospatialData() interface{} {
+	return ""
+}
+
+// Index ...
+func (hm *HmsModel) Index() Model {
 	mod := Model{
 		Type:           hm.Type,
 		Version:        hm.Version,
@@ -202,12 +194,7 @@ func (hm *HmsModel) Index() (Model, error) {
 	for file, metaData := range hm.Metadata.GeometryMetadata {
 		mod.Files.InputFiles.GeometryFiles.FeaturesProperties[file] = metaData
 	}
-	return mod, nil
-}
-
-// GeospatialData  ...
-func (hm *HmsModel) GeospatialData() (interface{}, error) {
-	return "", nil
+	return mod
 }
 
 // NewHmsModel ...
@@ -228,12 +215,8 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 		return &hm, err
 	}
 
-	err = getGridPath(&hm)
-	if err != nil {
-		return &hm, err
-	}
+	getGridPath(&hm)
 
-	errChan := make(chan error)
 	var hmsWG hmsWaitGroup
 
 	for _, file := range hm.Files.Paths() {
@@ -244,26 +227,21 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 
 		case hmsFileExt.Control:
 			hmsWG.Control.Add(1)
-			go getControlData(&hm, file, &hmsWG.Control, errChan)
+			go getControlData(&hm, file, &hmsWG.Control)
 
 		case hmsFileExt.Forcing:
 			hmsWG.Forcing.Add(1)
-			go getForcingData(&hm, file, &hmsWG.Forcing, errChan)
+			go getForcingData(&hm, file, &hmsWG.Forcing)
 
 		case hmsFileExt.Geometry:
 			hmsWG.Geometry.Add(1)
-			go getGeometryData(&hm, file, &hmsWG.Geometry, errChan)
+			go getGeometryData(&hm, file, &hmsWG.Geometry)
 		}
 	}
 
 	hmsWG.Control.Wait()
 	hmsWG.Forcing.Wait()
 	hmsWG.Geometry.Wait()
-
-	if len(errChan) > 0 {
-		fmt.Printf("Encountered %d errors\n", len(errChan))
-		return &hm, <-errChan
-	}
 
 	exportGeometryData(&hm)
 

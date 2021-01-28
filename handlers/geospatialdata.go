@@ -29,11 +29,7 @@ func GeospatialData(fs *filestore.FileStore) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
 		}
-
-		data, err := hm.GeospatialData()
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
-		}
+		data := hm.GeospatialData()
 
 		return c.JSON(http.StatusOK, data)
 	}

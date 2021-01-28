@@ -29,10 +29,7 @@ func Index(fs *filestore.FileStore) echo.HandlerFunc {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
 		}
-		// mod, err := hm.Index()
-		// if err != nil {
-		// 	return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
-		// }
+		// mod := hm.Index()
 
 		return c.JSON(http.StatusOK, hm)
 	}

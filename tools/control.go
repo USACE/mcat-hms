@@ -19,7 +19,7 @@ type HmsControlData struct {
 }
 
 //Extract simulation variables from the control file...
-func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup, errChan chan error) {
+func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 	defer wg.Done()
 
@@ -31,7 +31,6 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup, errChan chan 
 	if err != nil {
 		controlData.Notes += fmt.Sprintf("%s failed to process. ", file)
 		hm.Metadata.ControlMetadata[file] = controlData
-		errChan <- err
 		return
 	}
 

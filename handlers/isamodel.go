@@ -26,7 +26,7 @@ func IsAModel(fs *filestore.FileStore) echo.HandlerFunc {
 
 		hm, err := hms.NewHmsModel(definitionFile, *fs)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
+			return c.JSON(http.StatusOK, false)
 		}
 		isIt := hm.IsAModel()
 

@@ -3,7 +3,6 @@ package tools
 import (
 	"bufio"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -33,13 +32,4 @@ func rmNewLineChar(s string) string {
 func buildFilePath(modelDirectory, fileName string) string {
 	return filepath.Join(modelDirectory, strings.Replace(fileName, "\\", "/", -1))
 
-}
-
-// FileExists checks if a file exists, returning bool
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
 }
