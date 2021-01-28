@@ -1,0 +1,45 @@
+package tools
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/USACE/filestore"
+)
+
+// readFirstLine ...
+func readFirstLine(fs filestore.FileStore, fn string) (string, error) {
+	file, err := fs.GetObject(fn)
+	if err != nil {
+		fmt.Println("Couldn't open the file", fn)
+		return "", err
+	}
+	defer file.Close()
+
+	reader := bufio.NewReader(file)
+	line, err := reader.ReadString('\n')
+	return rmNewLineChar(line), err
+}
+
+// rmNewLineChar ...
+func rmNewLineChar(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, "\n", ""), "\r", "")
+}
+
+//Build the file path given its name and the file path of the definition file...
+func buildFilePath(modelDirectory, fileName string) string {
+	return filepath.Join(modelDirectory, strings.Replace(fileName, "\\", "/", -1))
+
+}
+
+// FileExists checks if a file exists, returning bool
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
+}

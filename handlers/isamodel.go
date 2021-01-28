@@ -1,0 +1,35 @@
+package handlers
+
+import (
+	hms "app/tools"
+	"net/http"
+
+	// hms "github.com/USACE/mcat-hms/tools"
+
+	"github.com/USACE/filestore"
+	"github.com/labstack/echo/v4"
+)
+
+// IsAModel godoc
+// @Summary Check if the given key is a HMS model
+// @Description Check if the given key is a HMS model
+// @Tags MCAT
+// @Accept json
+// @Produce json
+// @Param definition_file query string true "/models/hms/Truckee_River/Truckee_River.hms"
+// @Success 200 {object} bool
+// @Router /isamodel [get]
+func IsAModel(fs *filestore.FileStore) echo.HandlerFunc {
+	return func(c echo.Context) error {
+
+		definitionFile := c.QueryParam("definition_file")
+
+		hm, err := hms.NewHmsModel(definitionFile, *fs)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
+		}
+		isIt := hm.IsAModel()
+
+		return c.JSON(http.StatusOK, isIt)
+	}
+}
