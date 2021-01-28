@@ -1,0 +1,278 @@
+definitions:
+  handlers.SimpleResponse:
+    properties:
+      message:
+        type: string
+      status:
+        type: integer
+    type: object
+  tools.ControlFiles:
+    properties:
+      data:
+        additionalProperties: true
+        description: placeholder
+        type: object
+      paths:
+        items:
+          type: string
+        type: array
+    type: object
+  tools.ForcingFiles:
+    properties:
+      data:
+        additionalProperties: true
+        description: placeholder
+        type: object
+      paths:
+        items:
+          type: string
+        type: array
+    type: object
+  tools.GeometryFiles:
+    properties:
+      featuresProperties:
+        additionalProperties: true
+        description: placeholder
+        type: object
+      georeference:
+        description: placeholder
+        type: object
+      paths:
+        items:
+          type: string
+        type: array
+    type: object
+  tools.InputFiles:
+    properties:
+      controlFiles:
+        $ref: '#/definitions/tools.ControlFiles'
+      forcingFiles:
+        $ref: '#/definitions/tools.ForcingFiles'
+      geometryFiles:
+        $ref: '#/definitions/tools.GeometryFiles'
+      localVariables:
+        description: placeholder
+        type: object
+      simulationVariables:
+        description: placeholder
+        type: object
+    type: object
+  tools.Model:
+    properties:
+      definitionFile:
+        type: string
+      files:
+        $ref: '#/definitions/tools.ModelFiles'
+      type:
+        type: string
+      version:
+        type: string
+    type: object
+  tools.ModelFiles:
+    properties:
+      inputFiles:
+        $ref: '#/definitions/tools.InputFiles'
+      outputFiles:
+        $ref: '#/definitions/tools.OutputFiles'
+      supplementalFiles:
+        $ref: '#/definitions/tools.SupplementalFiles'
+    type: object
+  tools.OutputFiles:
+    properties:
+      modelPrediction:
+        description: placeholder
+        type: object
+      paths:
+        items:
+          type: string
+        type: array
+      runFiles:
+        items:
+          type: string
+        type: array
+      runLogs:
+        items:
+          type: string
+        type: array
+    type: object
+  tools.SupplementalFiles:
+    properties:
+      observationalData:
+        description: placeholder
+        type: object
+      paths:
+        items:
+          type: string
+        type: array
+      visulizations:
+        description: placeholder
+        type: object
+    type: object
+host: localhost:5900
+info:
+  contact:
+    email: slawler@dewberry.com
+    name: API Support
+  description: API for the HMS MCAT
+  termsOfService: http://swagger.io/terms/
+  title: HMS MCAT API
+  version: "1.0"
+paths:
+  /geospatialdata:
+    get:
+      consumes:
+      - application/json
+      description: Extract geospatial data from a HMS model given an s3 key
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SimpleResponse'
+      summary: Extract geospatial data
+      tags:
+      - MCAT
+  /index:
+    get:
+      consumes:
+      - application/json
+      description: Extract metadata from a HMS model given an s3 key
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/tools.Model'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SimpleResponse'
+      summary: Index a HMS model
+      tags:
+      - MCAT
+  /isamodel:
+    get:
+      consumes:
+      - application/json
+      description: Check if the given key is a HMS model
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Check if the given key is a HMS model
+      tags:
+      - MCAT
+  /isgeospatial:
+    get:
+      consumes:
+      - application/json
+      description: Check if the HMS model has geospatial information
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: boolean
+      summary: Check if the HMS model has geospatial information
+      tags:
+      - MCAT
+  /modeltype:
+    get:
+      consumes:
+      - application/json
+      description: Extract the model type given an s3 key
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: HMS
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SimpleResponse'
+      summary: Extract the model type
+      tags:
+      - MCAT
+  /modelversion:
+    get:
+      consumes:
+      - application/json
+      description: Extract the HMS model version given an s3 key
+      parameters:
+      - description: /models/hms/Truckee_River/Truckee_River.hms
+        in: query
+        name: definition_file
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: "4.0"
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.SimpleResponse'
+      summary: Extract the HMS model version
+      tags:
+      - MCAT
+  /ping:
+    get:
+      consumes:
+      - application/json
+      description: Check which services are operational
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SimpleResponse'
+      summary: Status Check
+      tags:
+      - Health Check
+swagger: "2.0"
