@@ -1,6 +1,4 @@
-module app
-
-// module github.com/USACE/mcat-hms
+module github.com/USACE/mcat-hms
 
 go 1.15
 
