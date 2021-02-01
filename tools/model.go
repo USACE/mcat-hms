@@ -68,6 +68,7 @@ type SupplementalFiles struct {
 // HmsModel ...
 type HmsModel struct {
 	Type           string
+	Title          string
 	Version        string
 	Description    string
 	FileStore      filestore.FileStore
@@ -151,19 +152,19 @@ func (hm *HmsModel) Index() Model {
 	mod := Model{
 		Type:           hm.Type,
 		Version:        hm.Version,
-		DefinitionFile: hm.DefinitionFile,
+		DefinitionFile: BuildFilePath(hm.ModelDirectory, hm.DefinitionFile),
 		Files: ModelFiles{
 			InputFiles: InputFiles{
 				ControlFiles: ControlFiles{
-					Paths: hm.Files.InputFiles.ControlFiles,
+					Paths: buildFilePaths(hm.ModelDirectory, hm.Files.InputFiles.ControlFiles),
 					Data:  make(map[string]interface{}),
 				},
 				ForcingFiles: ForcingFiles{
-					Paths: hm.Files.InputFiles.ForcingFiles,
+					Paths: buildFilePaths(hm.ModelDirectory, hm.Files.InputFiles.ForcingFiles),
 					Data:  make(map[string]interface{}),
 				},
 				GeometryFiles: GeometryFiles{
-					Paths:              hm.Files.InputFiles.GeometryFiles,
+					Paths:              buildFilePaths(hm.ModelDirectory, hm.Files.InputFiles.GeometryFiles),
 					FeaturesProperties: make(map[string]interface{}),
 					Georeference:       nil,
 				},
@@ -171,7 +172,7 @@ func (hm *HmsModel) Index() Model {
 				LocalVariables:      nil,
 			},
 			OutputFiles: OutputFiles{
-				Paths:           hm.Files.OutputFiles.Paths(),
+				Paths:           buildFilePaths(hm.ModelDirectory, hm.Files.OutputFiles.Paths()),
 				ModelPrediction: nil,
 				RunFiles:        make([]string, 0),
 				RunLogs:         make([]string, 0),

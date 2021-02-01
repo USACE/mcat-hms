@@ -125,6 +125,9 @@ func getDefinitionData(hm *HmsModel) error {
 
 			switch strings.TrimSpace(data[0]) {
 
+			case "Project":
+				hm.Title = data[1]
+
 			case "Description:":
 				if projectBlock {
 					hm.Description = data[1]
