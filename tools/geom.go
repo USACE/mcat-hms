@@ -10,6 +10,7 @@ import (
 
 // HmsGeometryData ...
 type HmsGeometryData struct {
+	Title          string
 	Description    string
 	Units          string `json:"Unit System"`
 	MissingtoZero  string `json:"Missing Flow To Zero"`
@@ -88,6 +89,9 @@ out:
 		key := strings.TrimSpace(data[0])
 
 		switch key {
+
+		case "Basin":
+			geometryData.Title = strings.TrimSpace(data[1])
 
 		case "Description":
 			geometryData.Description = strings.TrimSpace(data[1])

@@ -9,6 +9,7 @@ import (
 
 // HmsForcingData ...
 type HmsForcingData struct {
+	Title            string
 	Description      string
 	Units            string `json:"Unit System"`
 	MissingToDefault string `json:"Set Missing Data to Default"`
@@ -51,6 +52,9 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 		data := strings.Split(line, ": ")
 
 		switch strings.TrimSpace(data[0]) {
+
+		case "Meteorology":
+			forcingData.Title = data[1]
 
 		case "Description":
 			forcingData.Description = data[1]

@@ -33,3 +33,13 @@ func BuildFilePath(modelDirectory, fileName string) string {
 	return filepath.Join(modelDirectory, strings.Replace(fileName, "\\", "/", -1))
 
 }
+
+//buildFilePaths ...
+func buildFilePaths(modelDirectory string, fileNames []string) []string {
+	filePaths := make([]string, len(fileNames))
+	for i, fileName := range fileNames {
+		filePaths[i] = BuildFilePath(modelDirectory, fileName)
+	}
+	return filePaths
+
+}

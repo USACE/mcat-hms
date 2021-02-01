@@ -9,6 +9,7 @@ import (
 
 // HmsControlData ...
 type HmsControlData struct {
+	Title        string
 	Description  string
 	StartDate    string `json:"Start Date"`
 	StartTime    string `json:"Start Time"`
@@ -47,6 +48,8 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 		data := strings.Split(line, ": ")
 
 		switch strings.TrimSpace(data[0]) {
+		case "Control":
+			controlData.Title = data[1]
 
 		case "Description":
 			controlData.Description = data[1]
