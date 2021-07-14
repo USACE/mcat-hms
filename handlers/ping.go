@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"app/config"
 	"fmt"
 	"net/http"
 
@@ -21,22 +22,26 @@ type SimpleResponse struct {
 // @Produce  json
 // @Success 200 {object} SimpleResponse
 // @Router /ping [get]
-func Ping(fs *filestore.FileStore) echo.HandlerFunc {
+func Ping(ac *config.APIConfig) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		switch (*fs).(type) {
+		err := ac.DB.Ping()
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]string{"status": "unavailable"})
+		}
+		switch (*ac.FileStore).(type) {
 		case *filestore.BlockFS:
 			fmt.Println("File is local")
-			return c.JSON(http.StatusOK, SimpleResponse{http.StatusOK, "🏓 Pong! 🏓"})
+			return c.JSON(http.StatusOK, map[string]string{"status": "available"})
 
 		case *filestore.S3FS:
-			s3FS := (*fs).(*filestore.S3FS)
+			s3FS := (*ac.FileStore).(*filestore.S3FS)
 			err := s3FS.Ping()
 			if err != nil {
-				return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, "Unavailable"})
+				return c.JSON(http.StatusInternalServerError, map[string]string{"status": "unavailable"})
 			}
 			fmt.Println("File is on S3")
-			return c.JSON(http.StatusOK, SimpleResponse{http.StatusOK, "🏓 Pong! 🏓"})
+			return c.JSON(http.StatusOK, map[string]string{"status": "available"})
 		}
-		return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, "Unavailable"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"status": "unavailable"})
 	}
 }
