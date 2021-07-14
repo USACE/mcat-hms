@@ -10,10 +10,10 @@ var collectionIDQuery = `SELECT c.collection_id FROM models.collections c
 						WHERE c.collection = $2;`
 
 // VacuumQuery ...
-var VacuumQuery []string = []string{"VACUUM ANALYZE models.hms;"}
+var vacuumQuery []string = []string{"VACUUM ANALYZE models.hms;"}
 
 // RefreshViewsQuery ...
-var RefreshViewsQuery []string = []string{"REFRESH MATERIALIZED VIEW models.hms_definition_metadata;",
+var refreshViewsQuery []string = []string{"REFRESH MATERIALIZED VIEW models.hms_definition_metadata;",
 	"REFRESH MATERIALIZED VIEW models.hms_control_metadata;",
 	"REFRESH MATERIALIZED VIEW models.hms_forcing_metadata;",
 	"REFRESH MATERIALIZED VIEW models.hms_geometry_metadata;"}

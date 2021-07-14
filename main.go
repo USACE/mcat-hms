@@ -44,10 +44,10 @@ func main() {
 	e.GET("/geospatialdata", handlers.GeospatialData(appConfig.FileStore))
 
 	// pgdb endpoints
-	e.POST("/upsert/model", pgdb.Upsert(appConfig))
-	e.POST("/upsert/geometry", pgdb.UpsertHMSGeometry(appConfig))
-	e.POST("/refresh", pgdb.RefreshHMSViews(appConfig))
-	e.POST("/vacuum", pgdb.VacuumHMSViews(appConfig))
+	e.POST("/upsert/model", pgdb.UpsertHMSModel(appConfig))
+	// e.POST("/upsert/geometry", pgdb.UpsertHMSGeometry(appConfig))
+	e.POST("/refresh", pgdb.RefreshHMSViews(appConfig.DB))
+	e.POST("/vacuum", pgdb.VacuumHMSViews(appConfig.DB))
 
 	e.Logger.Fatal(e.Start(appConfig.Address()))
 }
