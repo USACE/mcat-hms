@@ -9,9 +9,9 @@ package main
 // @host localhost:5900
 
 import (
-	"github.com/USACE/mcat-hms/config"
-	_ "github.com/USACE/mcat-hms/docs"
-	"github.com/USACE/mcat-hms/handlers"
+	"app/config"
+	_ "app/docs"
+	"app/handlers"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"

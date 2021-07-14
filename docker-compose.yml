@@ -3,6 +3,8 @@ version: "3.4"
 services:
   mcat-hms:
     build:
+      target: build
+      # target: prod
       context: ./
     volumes:
       - ./:/app
@@ -10,4 +12,3 @@ services:
       - 5900:5900
     env_file:
       - ./.env
-    entrypoint: CompileDaemon --build="go build main.go" --command=./main
