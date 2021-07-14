@@ -10,12 +10,13 @@ package main
 
 import (
 	"app/config"
-	_ "app/docs"
+	// _ "app/docs"
 	"app/handlers"
+	"app/pgdb"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	// echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
@@ -29,10 +30,10 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// HealthCheck
-	e.GET("/ping", handlers.Ping(appConfig.FileStore))
+	e.GET("/ping", handlers.Ping(appConfig))
 
 	// Swagger
-	e.GET("/swagger/*", echoSwagger.WrapHandler)
+	// e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// hms endpoints
 	e.GET("/index", handlers.Index(appConfig.FileStore))
@@ -41,6 +42,12 @@ func main() {
 	e.GET("/modeltype", handlers.ModelType(appConfig.FileStore))
 	e.GET("/modelversion", handlers.ModelVersion(appConfig.FileStore))
 	e.GET("/geospatialdata", handlers.GeospatialData(appConfig.FileStore))
+
+	// pgdb endpoints
+	e.POST("/upsert/model", pgdb.Upsert(appConfig))
+	e.POST("/upsert/geometry", pgdb.UpsertHMSGeometry(appConfig))
+	e.POST("/refresh", pgdb.RefreshHMSViews(appConfig))
+	e.POST("/vacuum", pgdb.VacuumHMSViews(appConfig))
 
 	e.Logger.Fatal(e.Start(appConfig.Address()))
 }
