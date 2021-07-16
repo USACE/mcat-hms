@@ -16,8 +16,8 @@ CREATE MATERIALIZED VIEW models.hms_control_metadata AS
 WITH control_metadata as (
     SELECT hms.model_inventory_id, d.key as file, d.value as meta
     FROM models.model hms
-    JOIN json_each((hms.model_metadata -> 'Metadata' -> 'ControlMetadata')) d ON true
-    WHERE (hms.model_metadata -> 'Metadata' ->> 'ControlMetadata') IS NOT NULL
+    JOIN json_each((hms.model_metadata -> 'ControlMetadata')) d ON true
+    WHERE (hms.model_metadata ->> 'ControlMetadata') IS NOT NULL
 ), model_metadata as (SELECT (model_metadata ->> 'ModelDirectory') as dir FROM models.model)
 SELECT 
     control_metadata.model_inventory_id, 
@@ -38,8 +38,8 @@ CREATE MATERIALIZED VIEW models.hms_forcing_metadata AS
 WITH forcing_metadata as (
     SELECT hms.model_inventory_id, d.key as file, d.value as meta 
     FROM models.model hms
-    JOIN json_each((hms.model_metadata -> 'Metadata' -> 'ForcingMetadata')) d ON true
-    WHERE (hms.model_metadata -> 'Metadata' ->> 'ForcingMetadata') IS NOT NULL
+    JOIN json_each((hms.model_metadata -> 'ForcingMetadata')) d ON true
+    WHERE (hms.model_metadata ->> 'ForcingMetadata') IS NOT NULL
 ), model_metadata as (SELECT (model_metadata ->> 'ModelDirectory') as dir FROM models.model)
 SELECT 
     forcing_metadata.model_inventory_id, 
@@ -58,8 +58,8 @@ CREATE MATERIALIZED VIEW models.hms_geometry_metadata AS
 WITH geometry_metadata as (
     SELECT hms.model_inventory_id, d.key as file, d.value as meta
     FROM models.model hms
-    JOIN json_each((hms.model_metadata -> 'Metadata' -> 'GeometryMetadata')) d ON true
-    WHERE (hms.model_metadata -> 'Metadata' ->> 'GeometryMetadata') IS NOT NULL
+    JOIN json_each((hms.model_metadata -> 'GeometryMetadata')) d ON true
+    WHERE (hms.model_metadata ->> 'GeometryMetadata') IS NOT NULL
 ), model_metadata as (SELECT (model_metadata ->> 'ModelDirectory') as dir FROM models.model)
 SELECT 
     geometry_metadata.model_inventory_id, 
