@@ -53,13 +53,10 @@ func getETLMetadata(hm *hms.HmsModel) ([]byte, error) {
 // INNER JOIN inv.sources s ON c.source_id = s.source_id AND s.source = $1
 // WHERE c.collection = $2;`
 func getCollectionID(tx *sqlx.Tx, definitionFile string) (int, error) {
-	fileParts := strings.Split(definitionFile, "/")
-	dataSource := fileParts[len(fileParts)-4]
-	dataCollection := fileParts[len(fileParts)-3]
 
 	var collectionID int
 
-	if err := tx.Get(&collectionID, collectionIDQuery, dataSource, dataCollection); err != nil {
+	if err := tx.Get(&collectionID, collectionIDQuery, definitionFile); err != nil {
 		return 0, err
 
 	}
@@ -67,14 +64,14 @@ func getCollectionID(tx *sqlx.Tx, definitionFile string) (int, error) {
 	return collectionID, nil
 }
 
-//`INSERT INTO models.hms (name, data_group, type, collection_id, s3_key, model_metadata, etl_metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)
+//`INSERT INTO models.model (name, type, collection_id, s3_key, model_metadata, etl_metadata) VALUES ($1, $2, $3, $4, $5, $6)
 // ON CONFLICT (s3_key)
-// DO UPDATE SET name = $1, data_group = $2, type = $3, collection_id = $4, s3_key = $5, model_metadata = $6, etl_metadata = $7 RETURNING model_inventory_id;`
+// DO UPDATE SET name = $1, type = $2, collection_id = $3, s3_key = $4, model_metadata = $5, etl_metadata = $6 RETURNING model_inventory_id;`
 func upsertModels(tx *sqlx.Tx, collectionID int, modelName string, definitionFile string, hmMarshal []byte, etlMetadata []byte) error {
-	modQuery := MakeUpsertQuery(QueryConfig{"models", "hms", "model_inventory_id", []string{"s3_key"}, []string{"name", "data_group", "type", "collection_id",
+	modQuery := MakeUpsertQuery(QueryConfig{"models", "model", "model_inventory_id", []string{"s3_key"}, []string{"name", "type", "collection_id",
 		"s3_key", "model_metadata", "etl_metadata"}}, false)
 
-	tx.MustExec(modQuery, modelName, "models", "hms", collectionID, definitionFile, hmMarshal, etlMetadata)
+	tx.MustExec(modQuery, modelName, "HMS", collectionID, definitionFile, hmMarshal, etlMetadata)
 
 	return nil
 }
@@ -98,7 +95,13 @@ func UpsertToDB(definitionFile string, ac *config.APIConfig) (err error) {
 		return
 	}
 
-	etlMetadata, err := getETLMetadata(hm)
+	// etlMetadata, err := getETLMetadata(hm)
+	// if err != nil {
+	// 	return
+	// }
+
+	etlMetadata := map[string]string{"model_name": hm.Title, "source_path": definitionFile, "destination_path": "", "projection_source_path": ""}
+	etlMarshal, err := json.Marshal(etlMetadata)
 	if err != nil {
 		return
 	}
@@ -118,7 +121,7 @@ func UpsertToDB(definitionFile string, ac *config.APIConfig) (err error) {
 		return
 	}
 
-	err = upsertModels(tx, collectionID, modelName, definitionFile, hmMarshal, etlMetadata)
+	err = upsertModels(tx, collectionID, modelName, definitionFile, hmMarshal, etlMarshal)
 	if err != nil {
 		return
 	}

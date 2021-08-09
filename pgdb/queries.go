@@ -2,15 +2,18 @@ package pgdb
 
 import (
 	"fmt"
+	"os"
 	"strings"
 )
 
-var collectionIDQuery = `SELECT c.collection_id FROM models.collections c
-						INNER JOIN inv.sources s ON c.source_id = s.source_id AND s.source = $1
-						WHERE c.collection = $2;`
+var collectionIDQuery = fmt.Sprintf(`
+	SELECT collection_id 
+	FROM inventory.collections 
+	WHERE STRING_TO_ARRAY($1, '/') @> STRING_TO_ARRAY(TRIM(REPLACE(s3_prefix, 's3://%s/', ''), '/'),'/');`,
+	os.Getenv("S3_BUCKET"))
 
 // VacuumQuery ...
-var vacuumQuery []string = []string{"VACUUM ANALYZE models.hms;"}
+var vacuumQuery []string = []string{"VACUUM ANALYZE models.model;"}
 
 // RefreshViewsQuery ...
 var refreshViewsQuery []string = []string{"REFRESH MATERIALIZED VIEW models.hms_definition_metadata;",
