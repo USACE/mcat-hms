@@ -9,8 +9,7 @@ import (
 var collectionIDQuery = fmt.Sprintf(`
 SELECT collection_id 
 FROM inventory.collections 
-WHERE 's3://%s/' || $1 LIKE s3_prefix || '%';`,
-	os.Getenv("S3_BUCKET"))
+WHERE 's3://%s/'`, os.Getenv("S3_BUCKET")+` || $1 LIKE s3_prefix || '%';`)
 
 // VacuumQuery ...
 var vacuumQuery []string = []string{"VACUUM ANALYZE models.model;"}
