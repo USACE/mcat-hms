@@ -21,7 +21,10 @@ type HmsGeometryData struct {
 	Features       map[string][]string
 	GeoRefFiles    []string `json:"Geospatial Reference Files"`
 	CRS            string   `json:"Coordinate System"`
-	Notes          string
+	LossRate       string `json:"LossRate"`
+	Transform	   string`json:"Transform"`
+	Notes          string 
+
 }
 
 // GeometryFeatureTypes ...
@@ -113,6 +116,14 @@ out:
 
 		case "Enable Quality Routing":
 			geometryData.QualityRouting = strings.TrimSpace(data[1])
+
+		
+		case "Transform":
+			geometryData.Transform = strings.TrimSpace(data[1])
+
+		
+		case "LossRate":
+			geometryData.LossRate = strings.TrimSpace(data[1])
 
 		case "File":
 			filename := strings.TrimSpace(data[1])
