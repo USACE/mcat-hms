@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build Container
         run: |
-          docker build . --target prod -t dewberrycsi/mcat-hms:v2-dev-latest
+          docker build . --target prod -t dewberrycsi/mcat-hms:v2-dev2-latest
       - name: Bump a new Release and update Version
         uses: actions/checkout@v2
         with:
