@@ -32,4 +32,4 @@ jobs:
           docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
       - name: Push Container to DockerHub
         run: |
-          docker push dewberrycsi/mcat-hms:v2-dev-latest
+          docker push dewberrycsi/mcat-hms:v2-dev2-latest
