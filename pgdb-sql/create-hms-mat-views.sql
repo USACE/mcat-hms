@@ -38,6 +38,7 @@ AS WITH control_metadata AS (
     model_metadata
 WITH DATA;
 
+-- Forcing files 
 CREATE MATERIALIZED VIEW models.hms_forcing_metadata
 AS WITH forcing_metadata AS (
          SELECT m.model_inventory_id,
