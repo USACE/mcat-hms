@@ -15,7 +15,7 @@ FROM
 		i."source" AS col_4,
 		r.s3_key AS s3_key
 			
-	 FROM hms_definition_metadata t
+	 FROM models.hms_definition_metadata t
 	 JOIN models.model r ON r.model_inventory_id = t.model_inventory_id
 	 JOIN inventory.collections i ON i.collection_id = t.collection 
 	) squery;
