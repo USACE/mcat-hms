@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 )
@@ -10,6 +12,7 @@ import (
 // HmsForcingData ...
 type HmsForcingData struct {
 	Title            string
+	Hash   		     string
 	Description      string
 	Units            string `json:"Unit System"`
 	MissingToDefault string `json:"Set Missing Data to Default"`
@@ -41,7 +44,10 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
 
 	var line string
 
@@ -88,5 +94,6 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 		}
 	}
+	forcingData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
 	hm.Metadata.ForcingMetadata[file] = forcingData
 }

@@ -9,10 +9,11 @@ import (
 
 // Model is a general type should contain all necessary data for a model of any type.
 type Model struct {
-	Type           string
-	Version        string
-	DefinitionFile string
-	Files          ModelFiles
+	Type               string
+	Version            string
+	DefinitionFile     string
+	DefinitionFileHash string
+	Files              ModelFiles
 }
 
 // ModelFiles ...
@@ -67,15 +68,16 @@ type SupplementalFiles struct {
 
 // HmsModel ...
 type HmsModel struct {
-	Type           string
-	Title          string
-	Version        string
-	Description    string
-	FileStore      filestore.FileStore
-	ModelDirectory string
-	DefinitionFile string
-	Files          HmsModelFiles
-	Metadata       HmsModelMetadata
+	Type               string
+	Title              string
+	Version            string
+	Description        string
+	FileStore          filestore.FileStore
+	ModelDirectory     string
+	DefinitionFile     string
+	DefinitionFileHash string
+	Files              HmsModelFiles
+	Metadata           HmsModelMetadata
 }
 
 // HmsModelMetadata ...
@@ -150,9 +152,10 @@ func (hm *HmsModel) GeospatialData() interface{} {
 // Index ...
 func (hm *HmsModel) Index() Model {
 	mod := Model{
-		Type:           hm.Type,
-		Version:        hm.Version,
-		DefinitionFile: BuildFilePath(hm.ModelDirectory, hm.DefinitionFile),
+		Type:               hm.Type,
+		Version:            hm.Version,
+		DefinitionFile:     BuildFilePath(hm.ModelDirectory, hm.DefinitionFile),
+		DefinitionFileHash: hm.DefinitionFileHash,
 		Files: ModelFiles{
 			InputFiles: InputFiles{
 				ControlFiles: ControlFiles{

@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -11,6 +13,7 @@ import (
 // HmsGeometryData ...
 type HmsGeometryData struct {
 	Title          string
+	Hash           string
 	Description    string
 	Units          string `json:"Unit System"`
 	MissingtoZero  string `json:"Missing Flow To Zero"`
@@ -21,10 +24,9 @@ type HmsGeometryData struct {
 	Features       map[string][]string
 	GeoRefFiles    []string `json:"Geospatial Reference Files"`
 	CRS            string   `json:"Coordinate System"`
-	LossRate       string `json:"LossRate"`
-	Transform	   string`json:"Transform"`
-	Notes          string 
-
+	LossRate       string   `json:"LossRate"`
+	Transform      string   `json:"Transform"`
+	Notes          string
 }
 
 // GeometryFeatureTypes ...
@@ -78,7 +80,10 @@ func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
 
 	var line string
 
@@ -117,11 +122,9 @@ out:
 		case "Enable Quality Routing":
 			geometryData.QualityRouting = strings.TrimSpace(data[1])
 
-		
 		case "Transform":
 			geometryData.Transform = strings.TrimSpace(data[1])
 
-		
 		case "LossRate":
 			geometryData.LossRate = strings.TrimSpace(data[1])
 
@@ -163,6 +166,7 @@ out:
 		}
 
 	}
+	geometryData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
 	hm.Metadata.GeometryMetadata[file] = geometryData
 }
 
