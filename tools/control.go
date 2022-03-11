@@ -23,7 +23,7 @@ type HmsControlData struct {
 }
 
 //Extract simulation variables from the control file...
-func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -34,7 +34,9 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		controlData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.ControlMetadata[file] = controlData
+		mu.Unlock()
 		return
 	}
 
@@ -77,5 +79,8 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 		}
 	}
 	controlData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.ControlMetadata[file] = controlData
+	mu.Unlock()
 }

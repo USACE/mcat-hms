@@ -61,7 +61,7 @@ func getGridPath(hm *HmsModel) {
 }
 
 //Extract features and their properties from the geometry files...
-func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -74,7 +74,9 @@ func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		geometryData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.GeometryMetadata[file] = geometryData
+		mu.Unlock()
 		return
 	}
 
@@ -167,7 +169,10 @@ out:
 
 	}
 	geometryData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.GeometryMetadata[file] = geometryData
+	mu.Unlock()
 }
 
 //Check that the geometry reference files exists, read them into memory, and serialize ...

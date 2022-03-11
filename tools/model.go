@@ -222,6 +222,11 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 	getGridPath(&hm)
 
 	var hmsWG hmsWaitGroup
+	
+	// locks are needed on meta data maps to avoid race condition (concurrent map writing)
+	var muC sync.Mutex
+	var muF sync.Mutex
+	var muG sync.Mutex
 
 	for _, file := range hm.Files.Paths() {
 
@@ -231,15 +236,15 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 
 		case hmsFileExt.Control:
 			hmsWG.Control.Add(1)
-			go getControlData(&hm, file, &hmsWG.Control)
+			go getControlData(&hm, file, &hmsWG.Control, &muC)
 
 		case hmsFileExt.Forcing:
 			hmsWG.Forcing.Add(1)
-			go getForcingData(&hm, file, &hmsWG.Forcing)
+			go getForcingData(&hm, file, &hmsWG.Forcing, &muF)
 
 		case hmsFileExt.Geometry:
 			hmsWG.Geometry.Add(1)
-			go getGeometryData(&hm, file, &hmsWG.Geometry)
+			go getGeometryData(&hm, file, &hmsWG.Geometry, &muG)
 		}
 	}
 
