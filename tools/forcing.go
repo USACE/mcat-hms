@@ -27,7 +27,7 @@ type HmsForcingData struct {
 }
 
 //Extract meteorological variables from the forcing files...
-func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -38,7 +38,9 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		forcingData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.ForcingMetadata[file] = forcingData
+		mu.Unlock()
 		return
 	}
 
@@ -95,5 +97,8 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 		}
 	}
 	forcingData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.ForcingMetadata[file] = forcingData
+	mu.Unlock()
 }
