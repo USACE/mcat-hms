@@ -1,9 +1,10 @@
 package handlers
 
 import (
-	"app/config"
 	"fmt"
 	"net/http"
+
+	"github.com/Dewberry/mcat-hms/config"
 
 	"github.com/USACE/filestore"
 	"github.com/labstack/echo/v4"

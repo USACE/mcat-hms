@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	hms "app/tools"
+	"github.com/Dewberry/mcat-hms/tools"
 
 	"github.com/USACE/filestore"
 	"github.com/labstack/echo/v4"
@@ -24,7 +24,7 @@ func GeospatialData(fs *filestore.FileStore) echo.HandlerFunc {
 
 		definitionFile := c.QueryParam("definition_file")
 
-		hm, err := hms.NewHmsModel(definitionFile, *fs)
+		hm, err := tools.NewHmsModel(definitionFile, *fs)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, SimpleResponse{http.StatusInternalServerError, err.Error()})
 		}

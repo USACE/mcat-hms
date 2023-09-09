@@ -1,8 +1,9 @@
 package pgdb
 
 import (
-	"app/config"
 	"net/http"
+
+	"github.com/Dewberry/mcat-hms/config"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/labstack/echo/v4"

@@ -9,10 +9,10 @@ package main
 // @host localhost:5900
 
 import (
-	"app/config"
-	// _ "app/docs"
-	"app/handlers"
-	"app/pgdb"
+	"github.com/Dewberry/mcat-hms/config"
+	// _ "github.com/Dewberry/mcat-hmsdocs"
+	"github.com/Dewberry/mcat-hms/handlers"
+	"github.com/Dewberry/mcat-hms/pgdb"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
