@@ -1,17 +1,8 @@
 version: "3.4"
 
-networks:
- app_network:
-   name: mcat-hms-network
-   driver: bridge
-
 services:
-  api:
-    container_name: mcat-hms-api
-    image: mcat-hms-api  
+  mcat-hms:
     build:
-      target: build
-      # target: prod
       context: ./
     volumes:
       - ./:/app
@@ -19,19 +10,4 @@ services:
       - 5900:5900
     env_file:
       - ./.env
-    networks:
-      - app_network
-
-  newman:
-    image: postman/newman:alpine
-    container_name: mcat-hms-newman
-    entrypoint: [""]
-    command: >
-      sh -c "sleep 30s &&
-             newman run /app/testing/postman_collection.json --env-var "url=api:5900""
-    volumes:
-      - ./testing:/app/testing
-    depends_on:
-      - "api"
-    networks:
-      - app_network        
+    entrypoint: CompileDaemon --build="go build main.go" --command=./main

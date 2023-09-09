@@ -5,15 +5,12 @@ import (
 	"os"
 
 	"github.com/USACE/filestore"
-	_ "github.com/jackc/pgx/stdlib"
-	"github.com/jmoiron/sqlx"
 )
 
 type APIConfig struct {
 	Host      string
 	Port      int
 	FileStore *filestore.FileStore
-	DB        *sqlx.DB
 }
 
 // Address tells the application where to run the api out of
@@ -27,7 +24,6 @@ func Init() *APIConfig {
 	config.Host = "" // 0.0.0.0
 	config.Port = 5900
 	config.FileStore = FileStoreInit(false)
-	config.DB = DBInit()
 	return config
 }
 
@@ -56,12 +52,4 @@ func FileStoreInit(local bool) *filestore.FileStore {
 		}
 	}
 	return &fs
-}
-
-func DBInit() *sqlx.DB {
-
-	creds := fmt.Sprintf("user=%s password=%s host=%s port=%s database=%s sslmode=disable",
-		os.Getenv("DBUSER"), os.Getenv("DBPASS"), os.Getenv("DBHOST"), os.Getenv("DBPORT"), os.Getenv("DBNAME"))
-
-	return sqlx.MustOpen("pgx", creds)
 }

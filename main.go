@@ -9,14 +9,13 @@ package main
 // @host localhost:5900
 
 import (
-	"github.com/Dewberry/mcat-hms/config"
-	// _ "github.com/Dewberry/mcat-hmsdocs"
-	"github.com/Dewberry/mcat-hms/handlers"
-	"github.com/Dewberry/mcat-hms/pgdb"
+	"github.com/USACE/mcat-hms/config"
+	_ "github.com/USACE/mcat-hms/docs"
+	"github.com/USACE/mcat-hms/handlers"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	// echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
@@ -30,10 +29,10 @@ func main() {
 	e.Use(middleware.Recover())
 
 	// HealthCheck
-	e.GET("/ping", handlers.Ping(appConfig))
+	e.GET("/ping", handlers.Ping(appConfig.FileStore))
 
 	// Swagger
-	// e.GET("/swagger/*", echoSwagger.WrapHandler)
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// hms endpoints
 	e.GET("/index", handlers.Index(appConfig.FileStore))
@@ -42,12 +41,6 @@ func main() {
 	e.GET("/modeltype", handlers.ModelType(appConfig.FileStore))
 	e.GET("/modelversion", handlers.ModelVersion(appConfig.FileStore))
 	e.GET("/geospatialdata", handlers.GeospatialData(appConfig.FileStore))
-
-	// pgdb endpoints
-	e.POST("/upsert/model", pgdb.UpsertHMSModel(appConfig))
-	// e.POST("/upsert/geometry", pgdb.UpsertHMSGeometry(appConfig))
-	e.POST("/refresh", pgdb.RefreshHMSViews(appConfig.DB))
-	e.POST("/vacuum", pgdb.VacuumHMSViews(appConfig.DB))
 
 	e.Logger.Fatal(e.Start(appConfig.Address()))
 }

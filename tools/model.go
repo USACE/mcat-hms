@@ -9,11 +9,10 @@ import (
 
 // Model is a general type should contain all necessary data for a model of any type.
 type Model struct {
-	Type               string
-	Version            string
-	DefinitionFile     string
-	DefinitionFileHash string
-	Files              ModelFiles
+	Type           string
+	Version        string
+	DefinitionFile string
+	Files          ModelFiles
 }
 
 // ModelFiles ...
@@ -68,16 +67,15 @@ type SupplementalFiles struct {
 
 // HmsModel ...
 type HmsModel struct {
-	Type               string
-	Title              string
-	Version            string
-	Description        string
-	FileStore          filestore.FileStore
-	ModelDirectory     string
-	DefinitionFile     string
-	DefinitionFileHash string
-	Files              HmsModelFiles
-	Metadata           HmsModelMetadata
+	Type           string
+	Title          string
+	Version        string
+	Description    string
+	FileStore      filestore.FileStore
+	ModelDirectory string
+	DefinitionFile string
+	Files          HmsModelFiles
+	Metadata       HmsModelMetadata
 }
 
 // HmsModelMetadata ...
@@ -152,10 +150,9 @@ func (hm *HmsModel) GeospatialData() interface{} {
 // Index ...
 func (hm *HmsModel) Index() Model {
 	mod := Model{
-		Type:               hm.Type,
-		Version:            hm.Version,
-		DefinitionFile:     BuildFilePath(hm.ModelDirectory, hm.DefinitionFile),
-		DefinitionFileHash: hm.DefinitionFileHash,
+		Type:           hm.Type,
+		Version:        hm.Version,
+		DefinitionFile: BuildFilePath(hm.ModelDirectory, hm.DefinitionFile),
 		Files: ModelFiles{
 			InputFiles: InputFiles{
 				ControlFiles: ControlFiles{
@@ -222,11 +219,6 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 	getGridPath(&hm)
 
 	var hmsWG hmsWaitGroup
-	
-	// locks are needed on meta data maps to avoid race condition (concurrent map writing)
-	var muC sync.Mutex
-	var muF sync.Mutex
-	var muG sync.Mutex
 
 	for _, file := range hm.Files.Paths() {
 
@@ -236,15 +228,15 @@ func NewHmsModel(key string, fs filestore.FileStore) (*HmsModel, error) {
 
 		case hmsFileExt.Control:
 			hmsWG.Control.Add(1)
-			go getControlData(&hm, file, &hmsWG.Control, &muC)
+			go getControlData(&hm, file, &hmsWG.Control)
 
 		case hmsFileExt.Forcing:
 			hmsWG.Forcing.Add(1)
-			go getForcingData(&hm, file, &hmsWG.Forcing, &muF)
+			go getForcingData(&hm, file, &hmsWG.Forcing)
 
 		case hmsFileExt.Geometry:
 			hmsWG.Geometry.Add(1)
-			go getGeometryData(&hm, file, &hmsWG.Geometry, &muG)
+			go getGeometryData(&hm, file, &hmsWG.Geometry)
 		}
 	}
 

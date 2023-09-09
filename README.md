@@ -1,15 +1,10 @@
 # mcat-hms
-
-[![CI Pipeline](https://github.com/dewberry/mcat-hms/actions/workflows/build-release.yml/badge.svg)](https://github.com/Dewberry/mcat-hms/actions/workflows/build-release.yml)
-[![E2E Tests](https://github.com/dewberry/mcat-hms/actions/workflows/run-tests.yml/badge.svg?event=push)](https://github.com/Dewberry/mcat-hms/actions/workflows/run-tests.yml)
-
 Contains the HEC-HMS model content and analysis tool (MCAT). Given a .hms file, this MCAT identifies paths to .control, .met, .basin, .grid, .dss, .sqlite, and .shp files and extracts the model's metadata.
 
 The MCAT includes:
-
 - a standard set of methods to evaluate a model's content:
-  - isamodel
-  - modeltype
+    - isamodel
+	- modeltype
     - modelversion
     - index
     - isgeospatial
@@ -17,8 +12,8 @@ The MCAT includes:
 - an API for executing the above methods.
 - a docker container for running the methods and API.
 
-## Contents
 
+## Contents  
 - `/config`: contains the data structure that holds the config information for the API.
 - `/docs`: contains the auto-generated swagger files.
 - `/handlers`: contains the handler function for each API endpoint.
@@ -26,24 +21,23 @@ The MCAT includes:
 - `docker-compose.yml`: options for building the dockerfile.
 - `main.go` : API Server.
 
-### Getting Started
 
+### Getting Started
 ---
 
 - Add a .env file to the root level of this directory with the following structure:
-  ```
-  AWS_ACCESS_KEY_ID='**************'
-  AWS_SECRET_ACCESS_KEY='**************'
-  AWS_DEFAULT_REGION='us-east-1'
-  S3_BUCKET='******'
-  ```
+    ```
+    AWS_ACCESS_KEY_ID='**************'
+    AWS_SECRET_ACCESS_KEY='**************'
+    AWS_DEFAULT_REGION='us-east-1'
+    S3_BUCKET='******'
+    ```
 - Run `docker-compose up`
 - To teardown, run `docker-compose down`
 
+
 ### MCAT REST Specification
-
 ---
-
 The following requests can be used to interrogate a model whose storage location is defined by the s3_key parameter:
 
 `GET /isamodel?definition_file=<s3_key>`
@@ -58,12 +52,15 @@ The following requests can be used to interrogate a model whose storage location
 
 `GET /geospatialdata?definition_file=<s3_key>`
 
-_For example: `http://mcat-hms:5900/isamodel?definition_file=models/hms/Truckee_River/Truckee_River.hms`_
+
+*For example: `http://mcat-hms:5900/isamodel?definition_file=models/hms/Truckee_River/Truckee_River.hms`*
+
 
 ### Swagger Documentation:
 
 ---
 
 To view docs goto: http://localhost:5900/swagger/index.html
+
 
 ![](docs/swagger_image.png)
