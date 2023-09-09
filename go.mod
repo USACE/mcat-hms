@@ -1,4 +1,4 @@
-module app
+module github.com/Dewberry/mcat-hms
 
 go 1.16
 
