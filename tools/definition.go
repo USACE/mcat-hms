@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -111,7 +113,11 @@ func getDefinitionData(hm *HmsModel) error {
 	}
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
+
 	projectBlock := true
 	for sc.Scan() {
 		line := sc.Text()
@@ -159,6 +165,7 @@ func getDefinitionData(hm *HmsModel) error {
 	}
 
 	hm.Files = HmsModelFiles{inputFiles, outputFiles, HmsSupplementalFiles{}}
+	hm.DefinitionFileHash = fmt.Sprintf("%x", hasher.Sum(nil))
 
 	return nil
 }

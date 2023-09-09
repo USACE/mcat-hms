@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
 	"sync"
@@ -11,6 +13,7 @@ import (
 // HmsGeometryData ...
 type HmsGeometryData struct {
 	Title          string
+	Hash           string
 	Description    string
 	Units          string `json:"Unit System"`
 	MissingtoZero  string `json:"Missing Flow To Zero"`
@@ -21,6 +24,8 @@ type HmsGeometryData struct {
 	Features       map[string][]string
 	GeoRefFiles    []string `json:"Geospatial Reference Files"`
 	CRS            string   `json:"Coordinate System"`
+	LossRate       string   `json:"LossRate"`
+	Transform      string   `json:"Transform"`
 	Notes          string
 }
 
@@ -56,7 +61,7 @@ func getGridPath(hm *HmsModel) {
 }
 
 //Extract features and their properties from the geometry files...
-func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -69,13 +74,18 @@ func getGeometryData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		geometryData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.GeometryMetadata[file] = geometryData
+		mu.Unlock()
 		return
 	}
 
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
 
 	var line string
 
@@ -113,6 +123,12 @@ out:
 
 		case "Enable Quality Routing":
 			geometryData.QualityRouting = strings.TrimSpace(data[1])
+
+		case "Transform":
+			geometryData.Transform = strings.TrimSpace(data[1])
+
+		case "LossRate":
+			geometryData.LossRate = strings.TrimSpace(data[1])
 
 		case "File":
 			filename := strings.TrimSpace(data[1])
@@ -152,7 +168,11 @@ out:
 		}
 
 	}
+	geometryData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.GeometryMetadata[file] = geometryData
+	mu.Unlock()
 }
 
 //Check that the geometry reference files exists, read them into memory, and serialize ...

@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 )
@@ -10,6 +12,7 @@ import (
 // HmsForcingData ...
 type HmsForcingData struct {
 	Title            string
+	Hash   		     string
 	Description      string
 	Units            string `json:"Unit System"`
 	MissingToDefault string `json:"Set Missing Data to Default"`
@@ -24,7 +27,7 @@ type HmsForcingData struct {
 }
 
 //Extract meteorological variables from the forcing files...
-func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -35,13 +38,18 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		forcingData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.ForcingMetadata[file] = forcingData
+		mu.Unlock()
 		return
 	}
 
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
 
 	var line string
 
@@ -88,5 +96,9 @@ func getForcingData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 
 		}
 	}
+	forcingData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.ForcingMetadata[file] = forcingData
+	mu.Unlock()
 }

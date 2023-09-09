@@ -2,7 +2,9 @@ package tools
 
 import (
 	"bufio"
+	"crypto/sha256"
 	"fmt"
+	"io"
 	"strings"
 	"sync"
 )
@@ -10,6 +12,7 @@ import (
 // HmsControlData ...
 type HmsControlData struct {
 	Title        string
+	Hash   		 string
 	Description  string
 	StartDate    string `json:"Start Date"`
 	StartTime    string `json:"Start Time"`
@@ -20,7 +23,7 @@ type HmsControlData struct {
 }
 
 //Extract simulation variables from the control file...
-func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
+func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup, mu *sync.Mutex) {
 
 	defer wg.Done()
 
@@ -31,13 +34,18 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 	f, err := hm.FileStore.GetObject(filePath)
 	if err != nil {
 		controlData.Notes += fmt.Sprintf("%s failed to process. ", file)
+		mu.Lock()
 		hm.Metadata.ControlMetadata[file] = controlData
+		mu.Unlock()
 		return
 	}
 
 	defer f.Close()
 
-	sc := bufio.NewScanner(f)
+	hasher := sha256.New()
+
+	fs := io.TeeReader(f, hasher) // fs is still a stream
+	sc := bufio.NewScanner(fs)
 
 	var line string
 
@@ -70,5 +78,9 @@ func getControlData(hm *HmsModel, file string, wg *sync.WaitGroup) {
 			controlData.TimeInterval = data[1]
 		}
 	}
+	controlData.Hash = fmt.Sprintf("%x", hasher.Sum(nil))
+
+	mu.Lock()
 	hm.Metadata.ControlMetadata[file] = controlData
+	mu.Unlock()
 }
